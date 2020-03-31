@@ -1,4 +1,4 @@
-function get_data(dataset::String = "3dmnist", num_classes::Int = 10) 
+function get_data(num_classes::Int = 10) 
     
     if dataset == "3dmnist"
         

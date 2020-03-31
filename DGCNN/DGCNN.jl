@@ -1,6 +1,3 @@
-# possible datset {modelnet,3dmnist}
-("$(ARGS[1])" in ["modelnet", "3dmnist"]) || (print("$(ARGS[1]) dataset not supported, currently supported dataset are modelnet and 3dmnist"); exit();)
-
 #imports
 using NearestNeighbors, Statistics, LinearAlgebra, Random, Flux#master
 using Flux: onehotbatch, onecold, onehot, crossentropy, throttle, NNlib, @functor
@@ -9,21 +6,34 @@ using Statistics: mean
 using Base.Iterators: partition
 
 #args
-include("./config.jl")
+include(joinpath(@__DIR__,"config.jl"))
 
-dataset = "$(ARGS[1])"
-print(dataset)
-root = "./$(dataset)/"
+# possible datset {modelnet,3dmnist}
+if "$(ARGS[1])" in ["modelnet", "3dmnist"]
+    dataset = "$(ARGS[1])"
+    root = "./$(dataset)/"
+elseif "$(ARGS[1])" == ""
+    print("using dataset from the config $(dataset)")
+else
+   print("$(ARGS[1]) dataset not supported, currently supported dataset are modelnet and 3dmnist")
+   exit()
+end
+
+if dataset == "3dmnist"
+    num_classes=10
+end
 
 #data and model
-include("./data.jl")
-include("./model.jl")
+include(joinpath(@__DIR__,"data.jl"))
+include(joinpath(@__DIR__,"model.jl"))
 
 
 # input: width*height*channel*minibatch
 
 # Fetching the train and validation data and getting them into proper shape
-train, (valX, valY) = get_data(dataset, num_classes)
+print("Preparing Dataset\n")
+train, (valX, valY) = get_data(num_classes)
+print("Dataset loaded\n")
 
 # Defining the loss and accuracy functions
 
