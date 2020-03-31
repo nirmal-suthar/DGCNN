@@ -14,10 +14,9 @@ $ rm $ZIP_FILE
 For downloading and processing the 3dmnist dataset.
 ```bash
 $ URL=https://github.com/nirmal-suthar/dataset/raw/master/3dmnist.zip
-$ ZIP_FILE=./3dmnist/3dmnist.zip
-$ mkdir -p ./3dmnist/
+$ ZIP_FILE=./3dmnist.zip
 $ wget -N $URL -O $ZIP_FILE
-$ unzip $ZIP_FILE -d ./3dmnist/
+$ unzip $ZIP_FILE -d ./
 $ rm $ZIP_FILE
 ```
 
