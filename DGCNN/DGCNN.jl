@@ -1,3 +1,6 @@
+# possible datset {modelnet,3dmnist}
+("$(ARGS[1])" in ["modelnet", "3dmnist"]) || (print("$(ARGS[1]) dataset not supported, currently supported dataset are modelnet and 3dmnist"); exit();)
+
 #imports
 using NearestNeighbors, Statistics, LinearAlgebra, Random, Flux#master
 using Flux: onehotbatch, onecold, onehot, crossentropy, throttle, NNlib, @functor
@@ -8,7 +11,8 @@ using Base.Iterators: partition
 #args
 include("./config.jl")
 
-dataset = ARGS[1]
+dataset = "$(ARGS[1])"
+print(dataset)
 root = "./$(dataset)/"
 
 #data and model
