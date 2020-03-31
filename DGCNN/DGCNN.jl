@@ -1,18 +1,15 @@
 #imports
 using NearestNeighbors, Statistics, LinearAlgebra, Random, Flux#master
 using Flux: onehotbatch, onecold, onehot, crossentropy, throttle, NNlib, @functor
-using Zygote:@nograd
+using Zygote: @nograd, Params
 using Statistics: mean
 using Base.Iterators: partition
 
-
 #args
-root = "./data/"
-K = 10 # k nearest-neighbors
-batch_size = 2
-num_classes = 10 #possible values {10,40}
-npoints = 128
+include("./config.jl")
 
+dataset = ARGS[1]
+root = "./$(dataset)/"
 
 #data and model
 include("./data.jl")
@@ -22,15 +19,7 @@ include("./model.jl")
 # input: width*height*channel*minibatch
 
 # Fetching the train and validation data and getting them into proper shape
-datapath, classes = get_data(num_classes)
-X = [datapoint(p, classes) for p in datapath["train"]]
-data = [X[i][1] for i in 1:length(X)]
-labels = onehotbatch(cat([X[i][2] for i in 1:length(X)]..., dims=1), 1:num_classes)
-train = [(cat(data[i]..., dims = 3), labels[:,i]) for i in partition(1:length(data), batch_size)]
-
-VAL = [datapoint(p, classes) for p in datapath["test"]]
-valX = cat([VAL[i][1] for i in 1:length(VAL)]..., dims=3)
-valY = onehotbatch(cat([VAL[i][2] for i in 1:length(VAL)]..., dims=1), 1:num_classes)
+train, (valX, valY) = get_data(dataset, num_classes)
 
 # Defining the loss and accuracy functions
 
@@ -42,21 +31,29 @@ accuracy(x, y) = mean(onecold(cpu(m(x)), 1:num_classes) .== onecold(cpu(y), 1:nu
 
 # Defining the callback and the optimizer
 
-evalcb = throttle(() -> @show(accuracy(valX, valY)), 10)
-
-opt = ADAM()
+opt = ADAM(0.003)
 
 # Starting to train models
 
-# print(m(rand(3,npoints,batch_size)))
-print(typeof(train[1][1]))
-# print(loss(train[1]...))
-# gradient(() -> loss(train[1]...), params(m))
+function custom_train!(loss, ps, data, opt, epochs)
+    ps = Zygote.Params(ps)
+    for epoch in 1:epochs
+        running_loss = 0
+        for d in data
+        gs = gradient(ps) do
+            training_loss = loss(d...)
+            running_loss += training_loss
+            return training_loss
+        end
+        Flux.update!(opt, ps, gs)
+        end
+        print("Epoch: $(epoch), epoch_loss: $(running_loss), accuracy: $(accuracy(valX, valY))\n")
+    end
+  end
 
 print("Training Start\n")
-Flux.train!(loss, params(m), train, opt, cb = evalcb)
+custom_train!(loss, params(m), train, opt, epochs)
 print("Training Finished\n")
 
-
-# Accuracy of valset of ModelNet dataset
+# Accuracy of valset
 @show(accuracy(valX, valY))
