@@ -34,7 +34,7 @@ Both model are trained with similar config
 batch_size = 32
 npoints = 1024
 lr = 0.003 (ADAM)
-K ( nearest-neighbour, used in DGCNN )
+K ( nearest-neighbour, used in DGCNN ) = 10
 ```
 
 Dataset | ModelNet (10 classes) |
