@@ -27,4 +27,17 @@ For running the model
 ```bash
 $ julia --project="." DGCNN/DGCNN.jl <name of dataset to train> 
 ```
+## Results
 
+Both model are trained with similar config
+```
+batch_size = 32
+npoints = 1024
+lr = 0.003 (ADAM)
+K ( nearest-neighbour, used in DGCNN )
+```
+
+Dataset | ModelNet (10 classes) |
+---|--|
+DGCNN |<b>0.8744</b>|
+PointNet |0.7544|
